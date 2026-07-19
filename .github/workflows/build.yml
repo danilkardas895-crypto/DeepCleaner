@@ -31,7 +31,16 @@ jobs:
         echo "buildscript { repositories { google(); mavenCentral() }; dependencies { classpath 'com.android.tools.build:gradle:8.2.0'; classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0' } }" > build.gradle
         echo "allprojects { repositories { google(); mavenCentral() } }" >> build.gradle
         
-        gradle wrapper --gradle-version 8.2
+        # Скачиваем готовые файлы обертки Gradle напрямую, чтобы не вызывать локальную команду gradle
+        mkdir -p gradle/wrapper
+        curl -L -o gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v8.2.0/gradle/wrapper/gradle-wrapper.jar
+        echo "distributionBase=GRADLE_USER_HOME" > gradle/wrapper/gradle-wrapper.properties
+        echo "distributionPath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
+        echo "distributionUrl=https\://services.gradle.org/distributions/gradle-8.2-bin.zip" >> gradle/wrapper/gradle-wrapper.properties
+        echo "zipStoreBase=GRADLE_USER_HOME" >> gradle/wrapper/gradle-wrapper.properties
+        echo "zipStorePath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
+        
+        curl -L -o gradlew https://github.com/gradle/gradle/raw/v8.2.0/gradlew
 
     - name: Change gradlew permissions
       run: chmod +x gradlew
