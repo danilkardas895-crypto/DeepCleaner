@@ -17,47 +17,15 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Setup Complete Android Structure
+    - name: Setup Root Gradle Files
       run: |
-        # Корневые файлы
+        # Создаем корневой build.gradle
         echo "buildscript { repositories { google(); mavenCentral() }; dependencies { classpath 'com.android.tools.build:gradle:8.2.0'; classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0' } }" > build.gradle
         echo "allprojects { repositories { google(); mavenCentral() } }" >> build.gradle
-        echo "include ':app'" > settings.gradle
+        
+        # Подключаем твою реальную папку DeepCleaner вместо app
+        echo "include ':DeepCleaner'" > settings.gradle
         echo "rootProject.name = 'DeepCleaner'" >> settings.gradle
-        
-        # Гарантируем наличие папки app и создаем там правильный build.gradle
-        mkdir -p app
-        cat << 'EOF' > app/build.gradle
-        plugins {
-            id 'com.android.application'
-            id 'org.jetbrains.kotlin.android'
-        }
-        
-        android {
-            namespace 'com.example.deepcleaner'
-            compileSdk 34
-            
-            defaultConfig {
-                applicationId 'com.example.deepcleaner'
-                minSdk 26
-                targetSdk 34
-                versionCode 1
-                versionName '1.0'
-            }
-            
-            buildTypes {
-                release {
-                    minifyEnabled false
-                }
-            }
-        }
-        
-        dependencies {
-            implementation 'androidx.core:core-ktx:1.12.0'
-            implementation 'androidx.appcompat:appcompat:1.6.1'
-            implementation 'com.google.android.material:material:1.11.0'
-        }
-        EOF
 
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
@@ -69,10 +37,10 @@ jobs:
       run: |
         gradle wrapper --gradle-version 8.2
         chmod +x gradlew
-        ./gradlew :app:assembleDebug
+        ./gradlew :DeepCleaner:assembleDebug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: DeepCleaner-APK
-        path: app/build/outputs/apk/debug/app-debug.apk
+        path: DeepCleaner/build/outputs/apk/debug/DeepCleaner-debug.apk
