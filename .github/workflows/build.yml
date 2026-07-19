@@ -19,11 +19,8 @@ jobs:
 
     - name: Setup Root Gradle Files
       run: |
-        # Создаем корневой build.gradle
         echo "buildscript { repositories { google(); mavenCentral() }; dependencies { classpath 'com.android.tools.build:gradle:8.2.0'; classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0' } }" > build.gradle
         echo "allprojects { repositories { google(); mavenCentral() } }" >> build.gradle
-        
-        # Подключаем твою реальную папку DeepCleaner вместо app
         echo "include ':DeepCleaner'" > settings.gradle
         echo "rootProject.name = 'DeepCleaner'" >> settings.gradle
 
@@ -31,7 +28,6 @@ jobs:
       uses: gradle/actions/setup-gradle@v4
       with:
         gradle-version: 8.2
-        generate-job-summary: false
 
     - name: Run Android Build
       run: |
@@ -43,4 +39,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: DeepCleaner-APK
-        path: DeepCleaner/build/outputs/apk/debug/DeepCleaner-debug.apk
+        path: DeepCleaner/build/outputs/apk/debug/*.apk
