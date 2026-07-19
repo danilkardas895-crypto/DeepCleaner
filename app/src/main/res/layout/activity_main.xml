@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp"
+    android:background="#121212">
+
+    <Button
+        android:id="@+id/btnClean"
+        android:layout_width="220dp"
+        android:layout_height="220dp"
+        android:text="УНИЧТОЖИТЬ\nМУСОР"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#CF6679"
+        android:elevation="8dp"
+        android:layout_marginBottom="50dp" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/switchAutoClean"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Автоочистка (Accessibility) "
+        android:textSize="16sp"
+        android:textColor="#E0E0E0" />
+
+</LinearLayout>
