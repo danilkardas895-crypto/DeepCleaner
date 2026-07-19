@@ -17,51 +17,23 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Setup Gradle Environment
+    - name: Create Root Gradle Files
       run: |
-        # Создаем корневой build.gradle
+        # Создаем правильный корневой build.gradle
         echo "buildscript { repositories { google(); mavenCentral() }; dependencies { classpath 'com.android.tools.build:gradle:8.2.0'; classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0' } }" > build.gradle
         echo "allprojects { repositories { google(); mavenCentral() } }" >> build.gradle
         
-        # Создаем settings.gradle
+        # Создаем settings.gradle, который привяжет твою существующую папку app
         echo "include ':app'" > settings.gradle
         echo "rootProject.name = 'DeepCleaner'" >> settings.gradle
-        
-        # Пересоздаем build.gradle внутри папки app
-        mkdir -p app
-        cat << 'EOF' > app/build.gradle
-        plugins {
-            id 'com.android.application'
-            id 'org.jetbrains.kotlin.android'
-        }
-        
-        android {
-            namespace 'com.example.deepcleaner'
-            compileSdk 34
-            
-            defaultConfig {
-                applicationId 'com.example.deepcleaner'
-                minSdk 26
-                targetSdk 34
-                versionCode 1
-                versionName '1.0'
-            }
-        }
-        
-        dependencies {
-            implementation 'androidx.core:core-ktx:1.12.0'
-            implementation 'androidx.appcompat:appcompat:1.6.1'
-            implementation 'com.google.android.material:material:1.11.0'
-        }
-        EOF
 
-    - name: Setup Gradle Wrapper
+    - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
       with:
         gradle-version: 8.2
         generate-job-summary: false
 
-    - name: Run Build
+    - name: Run Android Build
       run: |
         gradle wrapper --gradle-version 8.2
         chmod +x gradlew
