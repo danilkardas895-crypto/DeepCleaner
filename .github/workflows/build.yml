@@ -1,0 +1,46 @@
+name: Build Deep Cleaner APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Create Dummy Gradle Environment
+      run: |
+        echo "include ':app'" > settings.gradle
+        echo "rootProject.name = 'DeepCleaner'" >> settings.gradle
+        
+        mkdir -p app
+        echo "plugins { id 'com.android.application'; id 'org.jetbrains.kotlin.android' }" > app/build.gradle
+        echo "android { namespace 'com.example.deepcleaner'; compileSdk 34; defaultConfig { applicationId 'com.example.deepcleaner'; minSdk 26; targetSdk 34; versionCode 1; versionName '1.0' } }" >> app/build.gradle
+        echo "dependencies { implementation 'androidx.core:core-ktx:1.12.0'; implementation 'androidx.appcompat:appcompat:1.6.1'; implementation 'com.google.android.material:material:1.11.0' }" >> app/build.gradle
+        
+        echo "buildscript { repositories { google(); mavenCentral() }; dependencies { classpath 'com.android.tools.build:gradle:8.2.0'; classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0' } }" > build.gradle
+        echo "allprojects { repositories { google(); mavenCentral() } }" >> build.gradle
+        
+        gradle wrapper --gradle-version 8.2
+
+    - name: Change gradlew permissions
+      run: chmod +x gradlew
+
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: DeepCleaner-APK
+        path: app/build/outputs/apk/debug/app-debug.apk
