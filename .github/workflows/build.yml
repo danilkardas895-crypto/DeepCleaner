@@ -17,12 +17,47 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Setup Root Gradle Files
+    - name: Force Injection of Gradle Files
       run: |
+        # Корневые файлы сборки
         echo "buildscript { repositories { google(); mavenCentral() }; dependencies { classpath 'com.android.tools.build:gradle:8.2.0'; classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0' } }" > build.gradle
         echo "allprojects { repositories { google(); mavenCentral() } }" >> build.gradle
         echo "include ':DeepCleaner'" > settings.gradle
         echo "rootProject.name = 'DeepCleaner'" >> settings.gradle
+        
+        # Запись конфигурации внутрь твоей папки DeepCleaner
+        mkdir -p DeepCleaner
+        cat << 'EOF' > DeepCleaner/build.gradle
+        plugins {
+            id 'com.android.application'
+            id 'org.jetbrains.kotlin.android'
+        }
+        
+        android {
+            namespace 'com.example.deepcleaner'
+            compileSdk 34
+            
+            defaultConfig {
+                applicationId 'com.example.deepcleaner'
+                minSdk 26
+                targetSdk 34
+                versionCode 1
+                versionName '1.0'
+            }
+            
+            buildTypes {
+                release {
+                    minifyEnabled false
+                }
+            }
+        }
+        
+        dependencies {
+            implementation 'androidx.core:core-ktx:1.12.0'
+            implementation 'androidx.appcompat:appcompat:1.6.1'
+            implementation 'com.google.android.material:material:1.11.0'
+        }
+        EOF
 
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
