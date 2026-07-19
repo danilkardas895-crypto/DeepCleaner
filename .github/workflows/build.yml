@@ -17,36 +17,55 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Create Dummy Gradle Environment
+    - name: Setup Gradle Environment
       run: |
-        echo "include ':app'" > settings.gradle
-        echo "rootProject.name = 'DeepCleaner'" >> settings.gradle
-        
-        mkdir -p app
-        echo "plugins { id 'com.android.application'; id 'org.jetbrains.kotlin.android' }" > app/build.gradle
-        echo "android { namespace 'com.example.deepcleaner'; compileSdk 34; defaultConfig { applicationId 'com.example.deepcleaner'; minSdk 26; targetSdk 34; versionCode 1; versionName '1.0' } }" >> app/build.gradle
-        echo "dependencies { implementation 'androidx.core:core-ktx:1.12.0'; implementation 'androidx.appcompat:appcompat:1.6.1'; implementation 'com.google.android.material:material:1.11.0' }" >> app/build.gradle
-        
+        # Создаем корневой build.gradle
         echo "buildscript { repositories { google(); mavenCentral() }; dependencies { classpath 'com.android.tools.build:gradle:8.2.0'; classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0' } }" > build.gradle
         echo "allprojects { repositories { google(); mavenCentral() } }" >> build.gradle
         
-        # Скачиваем стабильный jar-файл обертки
-        mkdir -p gradle/wrapper
-        curl -L -o gradle/wrapper/gradle-wrapper.jar https://repo.maven.apache.org/maven2/com/android/tools/build/gradle/8.2.0/gradle-wrapper-8.2.0.jar || curl -L -o gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v8.2.0/gradle/wrapper/gradle-wrapper.jar
+        # Создаем settings.gradle
+        echo "include ':app'" > settings.gradle
+        echo "rootProject.name = 'DeepCleaner'" >> settings.gradle
         
-        echo "distributionBase=GRADLE_USER_HOME" > gradle/wrapper/gradle-wrapper.properties
-        echo "distributionPath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
-        echo "distributionUrl=https\://services.gradle.org/distributions/gradle-8.2-bin.zip" >> gradle/wrapper/gradle-wrapper.properties
-        echo "zipStoreBase=GRADLE_USER_HOME" >> gradle/wrapper/gradle-wrapper.properties
-        echo "zipStorePath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
+        # Пересоздаем build.gradle внутри папки app
+        mkdir -p app
+        cat << 'EOF' > app/build.gradle
+        plugins {
+            id 'com.android.application'
+            id 'org.jetbrains.kotlin.android'
+        }
+        
+        android {
+            namespace 'com.example.deepcleaner'
+            compileSdk 34
+            
+            defaultConfig {
+                applicationId 'com.example.deepcleaner'
+                minSdk 26
+                targetSdk 34
+                versionCode 1
+                versionName '1.0'
+            }
+        }
+        
+        dependencies {
+            implementation 'androidx.core:core-ktx:1.12.0'
+            implementation 'androidx.appcompat:appcompat:1.6.1'
+            implementation 'com.google.android.material:material:1.11.0'
+        }
+        EOF
 
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3
+    - name: Setup Gradle Wrapper
+      uses: gradle/actions/setup-gradle@v4
       with:
         gradle-version: 8.2
+        generate-job-summary: false
 
-    - name: Build Debug APK
-      run: gradle assembleDebug
+    - name: Run Build
+      run: |
+        gradle wrapper --gradle-version 8.2
+        chmod +x gradlew
+        ./gradlew assembleDebug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
